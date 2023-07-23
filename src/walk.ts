@@ -39,8 +39,18 @@ export const walk = (node: Node, ctx: Context): ChildNode | null | void => {
 
     // v-scope
     if ((exp = checkAttr(el, 'v-scope')) || exp === '') {
-      const scope = exp ? evaluate(ctx.scope, exp) : {}
-      ctx = createScopedContext(ctx, scope)
+      const scope = exp === '.' ? ctx.scope : exp ? evaluate(ctx.scope, exp, el) : {}
+      scope.$root = el
+      scope.$emit = function emit(eventType: string, detail?: any) {
+        if (detail != null) {
+          el.dispatchEvent(new CustomEvent(eventType, { bubbles: true, detail }))
+        } else {
+          el.dispatchEvent(new Event(eventType, { bubbles: true }))
+        }
+      }
+      if (scope !== ctx.scope) {
+        ctx = createScopedContext(ctx, scope)
+      }
       if (scope.$template) {
         resolveTemplate(el, scope.$template)
       }

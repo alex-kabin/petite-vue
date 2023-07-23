@@ -49,7 +49,7 @@ export const on: Directive = ({ el, get, exp, arg, modifiers }) => {
     )
   }
   if (arg === 'vue:mounted') {
-    nextTick(handler)
+    void nextTick(handler)
     return
   } else if (arg === 'vue:unmounted') {
     return () => handler()

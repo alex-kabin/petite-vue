@@ -8,6 +8,10 @@ import { nextTick } from './scheduler'
 const escapeRegex = (str: string) =>
   str.replace(/[-.*+?^${}()|[\]\/\\]/g, '\\$&')
 
+export const globals = {
+  delimiters: undefined
+}
+
 export const createApp = (initialData?: any) => {
   // root context
   const ctx = createContext()
@@ -16,8 +20,9 @@ export const createApp = (initialData?: any) => {
     bindContextMethods(ctx.scope)
 
     // handle custom delimiters
-    if (initialData.$delimiters) {
-      const [open, close] = (ctx.delimiters = initialData.$delimiters)
+    const delimiters = initialData.$delimiters ?? globals.delimiters;
+    if (delimiters) {
+      const [open, close] = (ctx.delimiters = delimiters)
       ctx.delimitersRE = new RegExp(
         escapeRegex(open) + '([^]+?)' + escapeRegex(close),
         'g'
@@ -33,6 +38,8 @@ export const createApp = (initialData?: any) => {
   let rootBlocks: Block[]
 
   return {
+    $component: ctx.scope,
+
     directive(name: string, def?: Directive) {
       if (def) {
         ctx.dirs[name] = def
